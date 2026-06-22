@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Platen">
+<title>🎵 Platencollectie</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0a0a;color:#fff;min-height:100vh}
+header{background:#111;position:sticky;top:0;z-index:100;border-bottom:2px solid #c0392b;box-shadow:0 4px 24px rgba(0,0,0,.6);padding:12px 14px 0}
+.header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-titel{font-size:18px;font-weight:700}
+.logo-titel span{color:#c0392b}
+.teller{font-size:12px;color:#d4ac0d;font-weight:700;background:rgba(212,172,13,.12);padding:4px 10px;border-radius:20px;border:1px solid rgba(212,172,13,.3)}
+.zoek-wrap{position:relative;margin-bottom:8px}
+.zoek-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none}
+#zoekInput{width:100%;padding:10px 36px;background:#1e1e1e;border:1.5px solid #2a2a2a;border-radius:12px;color:#fff;font-size:16px;outline:none}
+#zoekInput:focus{border-color:#c0392b}
+.zoek-clear{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:#555;font-size:17px;cursor:pointer;padding:4px;display:none}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;border:1.5px solid #2a2a2a;background:transparent;color:#777;transition:all .15s}
+.chip.actief{background:#c0392b;border-color:#c0392b;color:#fff}
+.tabs{display:flex;gap:2px}
+.tab{padding:8px 16px;border-radius:8px 8px 0 0;font-size:13px;font-weight:700;cursor:pointer;border:none;background:transparent;color:#555;border-bottom:2px solid transparent;transition:all .15s}
+.tab.actief{color:#fff;border-bottom-color:#c0392b;background:rgba(192,57,43,.15)}
+main{padding:10px 12px 80px}
+.sectie-hdr{font-size:11px;font-weight:700;color:#555;letter-spacing:1px;text-transform:uppercase;padding:10px 2px 4px}
+.kaart{background:#151515;border-radius:12px;margin-bottom:7px;border:1px solid #222;overflow:hidden;cursor:pointer;transition:border-color .2s}
+.kaart.open{border-color:#c0392b}
+.kaart-hoofd{display:flex;align-items:center;padding:11px 13px;gap:11px}
+.plaat-info{flex:1;min-width:0}
+.plaat-titel{font-size:14px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3}
+.plaat-artiest{font-size:12px;color:#d4ac0d;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.plaat-meta{display:flex;gap:5px;margin-top:4px;flex-wrap:wrap}
+.badge{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:700}
+.badge-jaar{background:#1e1e1e;color:#888}
+.badge-formaat{background:rgba(192,57,43,.2);color:#e74c3c}
+.badge-land{background:#1e1e1e;color:#666}
+.staat-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.detail{display:none;padding:0 13px 13px;border-top:1px solid #1e1e1e}
+.kaart.open .detail{display:block}
+.detail-rij{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #1a1a1a;font-size:13px}
+.detail-rij:last-of-type{border-bottom:none}
+.detail-label{color:#666}
+.detail-waarde{color:#ddd;font-weight:500;text-align:right;max-width:60%}
+.staat-pill{padding:2px 10px;border-radius:10px;font-size:11px;font-weight:700}
+.verwijder-btn{width:100%;margin-top:10px;padding:8px;background:#1a0a0a;border:1px solid #4a1a1a;border-radius:8px;color:#e74c3c;font-size:12px;font-weight:700;cursor:pointer}
+.leeg{text-align:center;padding:60px 20px;color:#555}
+.form-veld{margin-bottom:12px}
+.form-label{display:block;font-size:11px;font-weight:700;color:#666;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+.form-input{width:100%;padding:11px 12px;background:#1e1e1e;border:1.5px solid #2a2a2a;border-radius:10px;color:#fff;font-size:15px;outline:none;-webkit-appearance:none}
+.form-input:focus{border-color:#c0392b}
+.form-rij{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opslaan-btn{width:100%;margin-top:8px;padding:14px;background:#c0392b;border:none;border-radius:12px;color:#fff;font-size:16px;font-weight:700;cursor:pointer}
+.opslaan-btn:active{background:#a93226}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:#222;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:600;opacity:0;transition:all .3s;z-index:999;white-space:nowrap;pointer-events:none;border:1px solid #333}
+.toast.toon{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<header>
+  <div class="header-top">
+    <div class="logo">
+      <svg width="34" height="34" viewBox="0 0 44 44">
+        <circle cx="22" cy="22" r="21" fill="#111" stroke="#333" stroke-width="1.5"/>
+        <circle cx="22" cy="22" r="15" fill="#1a1a1a"/>
+        <circle cx="22" cy="22" r="9" fill="#111"/>
+        <circle cx="22" cy="22" r="4" fill="#c0392b"/>
+        <circle cx="22" cy="22" r="1.5" fill="#111"/>
+      </svg>
+      <span class="logo-titel">Platen<span>collectie</span></span>
+    </div>
+    <span class="teller" id="teller">50 platen</span>
+  </div>
+  <div class="zoek-wrap">
+    <span class="zoek-icon">🔍</span>
+    <input type="text" id="zoekInput" placeholder="Zoek artiest of titel…" autocomplete="off" autocorrect="off" spellcheck="false">
+    <button class="zoek-clear" id="zoekClear" onclick="zoekWissen()">✕</button>
+  </div>
+  <div class="chips" id="chips"></div>
+  <div class="tabs">
+    <button class="tab actief" onclick="toonTab('collectie',this)">🎵 Collectie</button>
+    <button class="tab" onclick="toonTab('toevoegen',this)">+ Toevoegen</button>
+  </div>
+</header>
+
+<main>
+  <div id="collectie"><div id="lijst"></div></div>
+  <div id="toevoegen" style="display:none;padding-top:8px">
+    <div class="form-rij">
+      <div class="form-veld"><label class="form-label">Artiest *</label><input class="form-input" id="f_artiest" placeholder="bijv. Pink Floyd"></div>
+      <div class="form-veld"><label class="form-label">Jaar</label><input class="form-input" id="f_jaar" type="number" placeholder="1979"></div>
+    </div>
+    <div class="form-veld"><label class="form-label">Titel *</label><input class="form-input" id="f_titel" placeholder="bijv. The Wall"></div>
+    <div class="form-rij">
+      <div class="form-veld"><label class="form-label">Formaat</label>
+        <select class="form-input" id="f_formaat"><option>LP</option><option>2xLP</option><option>EP</option><option>Single (7")</option><option>12" Single</option><option>Maxi-Single</option><option>Box Set</option><option>Overig</option></select>
+      </div>
+      <div class="form-veld"><label class="form-label">Genre</label><input class="form-input" id="f_genre" placeholder="bijv. Rock"></div>
+    </div>
+    <div class="form-rij">
+      <div class="form-veld"><label class="form-label">Staat Vinyl</label>
+        <select class="form-input" id="f_staat_vinyl"><option>Mint (M)</option><option>Near Mint (NM)</option><option selected>Very Good Plus (VG+)</option><option>Very Good (VG)</option><option>Good Plus (G+)</option><option>Good (G)</option><option>Fair (F)</option><option>Poor (P)</option></select>
+      </div>
+      <div class="form-veld"><label class="form-label">Staat Hoes</label>
+        <select class="form-input" id="f_staat_hoes"><option>Mint (M)</option><option>Near Mint (NM)</option><option selected>Very Good Plus (VG+)</option><option>Very Good (VG)</option><option>Good Plus (G+)</option><option>Good (G)</option><option>Fair (F)</option><option>Poor (P)</option></select>
+      </div>
+    </div>
+    <div class="form-rij">
+      <div class="form-veld"><label class="form-label">Label / Nr.</label><input class="form-input" id="f_label" placeholder="bijv. EMI / EMC 3223"></div>
+      <div class="form-veld"><label class="form-label">Land</label><input class="form-input" id="f_land" placeholder="bijv. UK"></div>
+    </div>
+    <div class="form-veld"><label class="form-label">Opmerkingen</label><input class="form-input" id="f_opmerkingen" placeholder="bijv. originele persing"></div>
+    <button class="opslaan-btn" onclick="plaatOpslaan()">💾 Toevoegen aan collectie</button>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STAAT = {
+  "Mint (M)":             {k:"#27ae60",bg:"#0d2b1a"},
+  "Near Mint (NM)":       {k:"#2ecc71",bg:"#0d2b1a"},
+  "Very Good Plus (VG+)": {k:"#3498db",bg:"#0d1f2b"},
+  "Very Good (VG)":       {k:"#f39c12",bg:"#2b1f0d"},
+  "Good Plus (G+)":       {k:"#e67e22",bg:"#2b1500"},
+  "Good (G)":             {k:"#e74c3c",bg:"#2b0d0d"},
+  "Fair (F)":             {k:"#c0392b",bg:"#2b0d0d"},
+  "Poor (P)":             {k:"#922b21",bg:"#2b0d0d"},
+};
+function si(s){return STAAT[s]||{k:"#888",bg:"#222"}}
+
+const INIT = [{"artiest": "Supertramp", "titel": "Crime of the Century", "jaar": 1974, "label": "A&M / AMLH 63647", "barcode": "5060454940878", "staat_vinyl": "Very Good Plus (VG+)", "staat_hoes": "Very Good Plus (VG+)", "formaat": "LP", "genre": "Rock", "land": "NL", "opmerkingen": "NL pressing, vlooienmarkt"}, {"artiest": "Pink Floyd", "titel": "The Wall", "jaar": 1979, "label": "Harvest / SHDW 411", "barcode": "", "staat_vinyl": "Near Mint (NM)", "staat_hoes": "Very Good (VG)", "formaat": "2xLP", "genre": "Rock", "land": "UK", "opmerkingen": "Originele 1979 persing"}, {"artiest": "Kate Bush", "titel": "The Kick Inside", "jaar": 1978, "label": "EMI / EMC 3223", "barcode": "", "staat_vinyl": "Very Good Plus (VG+)", "staat_hoes": "Very Good Plus (VG+)", "formaat": "LP", "genre": "Art Rock", "land": "UK", "opmerkingen": ""}, {"artiest": "Marillion", "titel": "Fugazi", "jaar": 1984, "label": "EMI / EMC 3507", "barcode": "", "staat_vinyl": "Very Good Plus (VG+)", "staat_hoes": "Very Good (VG)", "formaat": "LP", "genre": "Prog Rock", "land": "UK", "opmerkingen": "Fish era"}, {"artiest": "Supertramp", "titel": "Brother Where You Bound", "jaar": 1985, "label": "A&M / AMLH 63647", "barcode": "8283950141", "staat_vinyl": "Good", "staat_hoes": "Good", "formaat": "LP", "genre": "Rock", "land": "UK", "opmerkingen": ""}, {"artiest": "Supertramp", "titel": "Breakfast in America", "jaar": 1979, "label": "A&M / AMLH 63647", "barcode": "", "staat_vinyl": "Good", "staat_hoes": "Good", "formaat": "LP", "genre": "Rock", "land": "UK", "opmerkingen": ""}, {"artiest": "Supertramp", "titel": "Famous Last Words", "jaar": 1982, "label": "A&M / AMLH 63732", "barcode": "", "staat_vinyl": "Good", "staat_hoes": "Good", "formaat": "LP", "genre": "Rock", "land": "UK", "opmerkingen": ""}, {"artiest": "Supertramp", "titel": "Paris", "jaar": 1980, "label": "A&M / AMLH 66702", "barcode": "", "staat_vinyl": "Good", "staat_hoes": "Good", "formaat": "LP", "genre": "Rock", "land": "UK", "opmerkingen": ""}, {"artiest": "ELO", "titel": "Discovery", "jaar": 1979, "label": "Jet Records", "barcode": "", "staat_vinyl": "Good", "staat_hoes": "Good", "formaat": "LP", "genre": "Rock", "land": "UK", "opmerkingen": ""}, {"artiest": "Deep Purple", "titel": "24 Carat", "jaar": 1975, "label": "EMI / LC2546", "barcode": "", "staat_vinyl": "Good", "staat_hoes": "Good", "formaat": "LP", "genre": "Hardrock", "land": "UK", "opmerkingen": ""}, {"artiest": "Deep Purple", "titel": "In Concert", "jaar": 1980, "label": "EMI", "barcode": "", "staat_vinyl": "Good", "staat_hoes": "Good", "formaat": "LP", "genre": "Hardrock", "land": "UK", "opmerkingen": ""}, {"artiest": "Robert Long", "titel": "Vroeger of Later", "jaar": 1974, "label": "BOVEMA", "barcode": "", "staat_vinyl": "Good", "staat_hoes": "Good", "formaat": "LP", "genre": "Nederlandstalig", "land": "NL", "opmerkingen": ""}, {"artiest": "AC/DC", "titel": "If You Want Blood", "jaar": 1978, "label": "Atlantic", "barcode": "", "staat_vinyl": "Good", "staat_hoes": "Good", "formaat": "LP", "genre": "Hardrock", "land": "AUS", "opmerkingen": ""}, {"artiest": "Andreas Vollenweider", "titel": "Behind the Gardens", "jaar": 1981, "label": "CBS", "barcode": "", "staat_vinyl": "Good", "staat_hoes": "Good", "formaat": "LP", "genre": "Instrumentaal", "land": "SUI", "opmerkingen": ""}, {"artiest": "Van Kooten en De Bie", "titel": "Op hun Pik Getrapt", "jaar": 1980, "label": "STEMRA / SIMPELPEE", "barcode": "", "staat_vinyl": "Good", "staat_hoes": "Good", "formaat": "LP", "genre": "Nederlandstalig", "land": "NL", "opmerkingen": ""}, {"artiest": "Iron Maiden", "titel": "Live in New York", "jaar": 2022, "label": "YELLOWIN RECORDS", "barcode": "", "staat_vinyl": "Good", "staat_hoes": "Good", "formaat": "LP", "genre": "Hardrock", "land": "UK", "opmerkingen": ""}, {"artiest": "Roger Waters", "titel": "The Pros and Cons of Hitch Hiking", "jaar": 1984, "label": "EMI", "barcode": "", "staat_vinyl": "Good", "staat_hoes": "Good", "formaat": "LP", "genre": "Rock", "land": "UK", "opmerkingen": ""}, {"artiest": "Fisher Z", "titel": "Word Salad", "jaar": 1979, "label": "EMI", "barcode": "", "staat_vinyl": "Good", "staat_hoes": "Good", "formaat": "LP", "genre": "SKA", "land": "UK", "opmerkingen": ""}, {"artiest": "The Alan Parsons Project", "titel": "Tales of Mystery and Imagination", "jaar": 1976, "label": "20th Century Records", "barcode": "", "staat_vinyl": "Good", "staat_hoes": "Good", "formaat": "LP", "genre": "Symfonic rock", "land": "UK", "opmerkingen": ""}, {"artiest": "Fisher Z", "titel": "Red Skies Over Paradise", "jaar": 1981, "label": "Liberty Records", "barcode": "", "staat_vinyl": "Good", "staat_hoes": "Good", "formaat": "LP", "genre": "SKA", "land": "UK", "opmerkingen": ""}, {"artiest": "Marillion", "titel": "Grendel", "jaar": 1982, "label": "EMI", "barcode": "", "staat_vinyl": "Good", "staat_hoes": "Good", "formaat": "12\"", "genre": "Symfonic rock", "land": "UK", "opmerkingen": ""}, {"artiest": "Marillion", "titel": "Script for a Jester's Tear", "jaar": 1983, "label": "EMI", "barcode": "", "staat_vinyl": "Good", "staat_hoes": "Good", "formaat": "LP", "genre": "Symfonic rock", "land": "UK", "opmerkingen": ""}, {"artiest": "Marillion", "titel": "Real to Reel", "jaar": 1984, "label": "EMI", "barcode": "", "staat_vinyl": "Good", "staat_hoes": "Good", "formaat": "LP", "genre": "Symfonic rock", "land": "UK", "opmerkingen": ""}, {"artiest": "Marillion", "titel": "Kayleigh", "jaar": 1985, "label": "EMI", "barcode": "", "staat_vinyl": "Good", "staat_hoes": "Good", "formaat": "12\"", "genre": "Symfonic rock", "land": "UK", "opmerkingen": ""}, {"artiest": "Marillion", "titel": "Lavender", "jaar": 1985, "label": "EMI", "barcode": "", "staat_vinyl": "Good", "staat_hoes": "Good", "formaat": "12\"", "genre": "Symfonic rock", "land": "UK", "opmerkingen": ""}, {"artiest": "Iron Maiden", "titel": "The Number of the Beast", "jaar": 1982, "label": "EMI", "barcode": "", "staat_vinyl": "Good", "staat_hoes": "Good", "formaat": "12\"", "genre": "Hardrock", "land": "UK", "opmerkingen": ""}, {"artiest": "Iron Maiden", "titel": "Senjutsu", "jaar": 2021, "label": "EMI", "barcode": "", "staat_vinyl": "Very Good Plus (VG+)", "staat_hoes": "Very Good Plus (VG+)", "formaat": "LP", "genre": "Hardrock", "land": "UK", "opmerkingen": "180 grams"}, {"artiest": "Jeff Wayne", "titel": "War of the Worlds", "jaar": 1978, "label": "CBS", "barcode": "", "staat_vinyl": "Good", "staat_hoes": "Good", "formaat": "LP", "genre": "Symfonic rock", "land": "UK", "opmerkingen": ""}, {"artiest": "The Alan Parsons Project", "titel": "Ammonia Avenue", "jaar": 1984, "label": "Arista", "barcode": "", "staat_vinyl": "Good", "staat_hoes": "Good", "formaat": "LP", "genre": "Symfonic rock", "land": "UK", "opmerkingen": ""}, {"artiest": "The Alan Parsons Project", "titel": "Eve", "jaar": 1979, "label": "Arista", "barcode": "", "staat_vinyl": "Good", "staat_hoes": "Good", "formaat": "LP", "genre": "Symfonic rock", "land": "UK", "opmerkingen": ""}, {"artiest": "The Alan Parsons Project", "titel": "Pyramid", "jaar": 1978, "label": "Arista", "barcode": "", "staat_vinyl": "Good", "staat_hoes": "Good", "formaat": "LP", "genre": "Symfonic rock", "land": "UK", "opmerkingen": ""}, {"artiest": "The Alan Parsons Project", "titel": "Eye in the Sky", "jaar": 1982, "label": "Arista", "barcode": "", "staat_vinyl": "Good", "staat_hoes": "Good", "formaat": "LP", "genre": "Symfonic rock", "land": "UK", "opmerkingen": ""}, {"artiest": "The Alan Parsons Project", "titel": "The Turn of a Friendly Card", "jaar": 1980, "label": "Arista", "barcode": "", "staat_vinyl": "Good", "staat_hoes": "Good", "formaat": "LP", "genre": "Symfonic rock", "land": "UK", "opmerkingen": ""}, {"artiest": "Pink Floyd", "titel": "Atom Heart Mother", "jaar": 2016, "label": "Pink Floyd Records", "barcode": "", "staat_vinyl": "Very Good Plus (VG+)", "staat_hoes": "Very Good Plus (VG+)", "formaat": "LP", "genre": "Symfonic rock", "land": "UK", "opmerkingen": "180 grams"}, {"artiest": "Pink Floyd", "titel": "Obscured by Clouds", "jaar": 1972, "label": "EMI", "barcode": "", "staat_vinyl": "Good", "staat_hoes": "Good", "formaat": "LP", "genre": "Symfonic rock", "land": "UK", "opmerkingen": ""}, {"artiest": "Pink Floyd", "titel": "Ummagumma", "jaar": 1969, "label": "EMI", "barcode": "", "staat_vinyl": "Good", "staat_hoes": "Good", "formaat": "LP", "genre": "Symfonic rock", "land": "UK", "opmerkingen": ""}, {"artiest": "The Police", "titel": "Synchronicity", "jaar": 1983, "label": "A&M", "barcode": "", "staat_vinyl": "Good", "staat_hoes": "Good", "formaat": "LP", "genre": "New Wave", "land": "UK", "opmerkingen": ""}, {"artiest": "The Police", "titel": "Outlandos d'Amour", "jaar": 1978, "label": "A&M", "barcode": "", "staat_vinyl": "Good", "staat_hoes": "Good", "formaat": "LP", "genre": "New Wave", "land": "UK", "opmerkingen": ""}, {"artiest": "Van Kooten en De Bie", "titel": "Willen Niet Dood", "jaar": 1985, "label": "STEMRA / SIMPELPEE", "barcode": "", "staat_vinyl": "Good", "staat_hoes": "Good", "formaat": "LP", "genre": "Nederlandstalig", "land": "NL", "opmerkingen": ""}, {"artiest": "Jon and Vangelis", "titel": "Short Stories", "jaar": 1979, "label": "Polydor Stemra", "barcode": "", "staat_vinyl": "Good", "staat_hoes": "Good", "formaat": "LP", "genre": "Symfonic rock", "land": "UK", "opmerkingen": ""}, {"artiest": "ELO", "titel": "Eldorado", "jaar": 1974, "label": "Jet Records", "barcode": "", "staat_vinyl": "Good", "staat_hoes": "Good", "formaat": "LP", "genre": "Symfonic rock", "land": "UK", "opmerkingen": ""}, {"artiest": "Queen", "titel": "A Day at the Races", "jaar": 1976, "label": "EMI", "barcode": "", "staat_vinyl": "Good", "staat_hoes": "Good", "formaat": "LP", "genre": "Rock", "land": "UK", "opmerkingen": ""}, {"artiest": "Supertramp", "titel": "Even in the Quietest Moments", "jaar": 1977, "label": "A&M", "barcode": "", "staat_vinyl": "Good", "staat_hoes": "Good", "formaat": "LP", "genre": "Rock", "land": "UK", "opmerkingen": ""}, {"artiest": "Camel", "titel": "Nude", "jaar": 1981, "label": "Decca", "barcode": "", "staat_vinyl": "Good", "staat_hoes": "Good", "formaat": "LP", "genre": "Symfonic rock", "land": "UK", "opmerkingen": ""}, {"artiest": "The Moody Blues", "titel": "This is the Moody Blues", "jaar": 1974, "label": "Stemra / Threshold", "barcode": "", "staat_vinyl": "Good", "staat_hoes": "Good", "formaat": "LP", "genre": "Symfonic rock", "land": "UK", "opmerkingen": ""}, {"artiest": "Queen", "titel": "News of the World", "jaar": 1977, "label": "EMI", "barcode": "", "staat_vinyl": "Good", "staat_hoes": "Good", "formaat": "LP", "genre": "Rock", "land": "UK", "opmerkingen": ""}, {"artiest": "Fleetwood Mac", "titel": "Rumours", "jaar": 1977, "label": "Warner Bros", "barcode": "", "staat_vinyl": "Good", "staat_hoes": "Good", "formaat": "LP", "genre": "Rock", "land": "US", "opmerkingen": ""}, {"artiest": "The Eagles", "titel": "Hotel California", "jaar": 1976, "label": "Asylum", "barcode": "", "staat_vinyl": "Good", "staat_hoes": "Good", "formaat": "LP", "genre": "Rock", "land": "US", "opmerkingen": ""}, {"artiest": "Muse", "titel": "Origin of Symmetry", "jaar": 2001, "label": "Taste Media / TMGD 001", "barcode": "5016958060916", "staat_vinyl": "Near Mint (NM)", "staat_hoes": "Near Mint (NM)", "formaat": "LP", "genre": "Alternative", "land": "UK", "opmerkingen": ""}];
+
+let col = [];
+let zoek = "", filter = "", openId = null;
+
+function laad(){
+  try{const d=localStorage.getItem("platen_v3");col=d?JSON.parse(d):[...INIT];}
+  catch(e){col=[...INIT];}
+}
+function sla(){try{localStorage.setItem("platen_v3",JSON.stringify(col));}catch(e){}}
+
+function render(){
+  const q=zoek.toLowerCase();
+  const gef=col.filter(p=>{
+    const mz=!q||p.artiest.toLowerCase().includes(q)||p.titel.toLowerCase().includes(q)||(p.genre||"").toLowerCase().includes(q);
+    const mf=!filter||p.artiest===filter;
+    return mz&&mf;
+  });
+  document.getElementById("teller").textContent=(zoek||filter)?`${gef.length} / ${col.length} platen`:`${col.length} platen`;
+
+  // Chips
+  const tels={};col.forEach(p=>{tels[p.artiest]=(tels[p.artiest]||0)+1;});
+  const tops=Object.entries(tels).filter(([,n])=>n>1).sort(([a],[b])=>a.localeCompare(b));
+  const chipsEl = document.getElementById("chips");
+  chipsEl.innerHTML =
+    `<button class="chip${!filter?" actief":""}" onclick="setFilter('')">Alle</button>`+
+    tops.map(([a,n],i)=>`<button class="chip${filter===a?" actief":""}" data-artiest="${i}" onclick="setFilterIdx(this)">${a.split(" ")[0]} (${n})</button>`).join("");
+  // sla artiestnamen op in dataset
+  chipsEl.querySelectorAll("[data-artiest]").forEach((btn,i)=>{btn._artiest=tops[i][0];});
+
+  // Lijst
+  if(!gef.length){
+    document.getElementById("lijst").innerHTML=`<div class="leeg"><div style="font-size:48px;margin-bottom:12px">🎵</div><p>Geen platen gevonden</p></div>`;
+    return;
+  }
+  const groepen={};
+  gef.forEach(p=>{if(!groepen[p.artiest])groepen[p.artiest]=[];groepen[p.artiest].push(p);});
+  const arr=Object.entries(groepen).sort(([a],[b])=>a.localeCompare(b));
+
+  document.getElementById("lijst").innerHTML=arr.map(([art,platen])=>`
+    <div class="sectie-hdr">${art} <span style="color:#333">(${platen.length})</span></div>
+    ${platen.map(p=>{
+      const idx=col.indexOf(p);
+      const id=`k${idx}`;
+      const isOpen=openId===id;
+      const info=si(p.staat_vinyl);
+      const details=[
+        ["Staat vinyl",p.staat_vinyl,true],
+        ["Staat hoes",p.staat_hoes,true],
+        ["Label / Nr.",p.label,false],
+        ["Barcode",p.barcode,false],
+        ["Genre",p.genre,false],
+        ["Opmerkingen",p.opmerkingen,false],
+      ].filter(([,v])=>v).map(([lbl,val,isSt])=>isSt
+        ?`<div class="detail-rij"><span class="detail-label">${lbl}</span><span class="staat-pill" style="color:${si(val).k};background:${si(val).bg}">${val}</span></div>`
+        :`<div class="detail-rij"><span class="detail-label">${lbl}</span><span class="detail-waarde">${val}</span></div>`
+      ).join("");
+      return `<div class="kaart${isOpen?" open":""}" id="${id}" onclick="toggle('${id}')">
+        <div class="kaart-hoofd">
+          <svg width="42" height="42" viewBox="0 0 44 44" style="flex-shrink:0">
+            <circle cx="22" cy="22" r="21" fill="#111" stroke="#333" stroke-width="1.5"/>
+            <circle cx="22" cy="22" r="15" fill="#1a1a1a"/>
+            <circle cx="22" cy="22" r="9" fill="#111"/>
+            <circle cx="22" cy="22" r="4" fill="${info.k}"/>
+            <circle cx="22" cy="22" r="1.5" fill="#111"/>
+          </svg>
+          <div class="plaat-info">
+            <div class="plaat-titel">${p.titel}</div>
+            <div class="plaat-artiest">${p.artiest}</div>
+            <div class="plaat-meta">
+              ${p.jaar?`<span class="badge badge-jaar">${p.jaar}</span>`:""}
+              <span class="badge badge-formaat">${p.formaat||"LP"}</span>
+              ${p.land?`<span class="badge badge-land">${p.land}</span>`:""}
+            </div>
+          </div>
+          <div class="staat-dot" style="background:${info.k}"></div>
+        </div>
+        <div class="detail">
+          ${details}
+          <button class="verwijder-btn" onclick="event.stopPropagation();verwijder(${idx})">🗑 Verwijderen</button>
+        </div>
+      </div>`;
+    }).join("")}
+  `).join("");
+}
+
+function toggle(id){
+  const el=document.getElementById(id);
+  if(!el)return;
+  if(openId&&openId!==id){const prev=document.getElementById(openId);if(prev)prev.classList.remove("open");}
+  el.classList.toggle("open");
+  openId=el.classList.contains("open")?id:null;
+  if(openId)setTimeout(()=>el.scrollIntoView({behavior:"smooth",block:"nearest"}),50);
+}
+function setFilter(a){filter=a;render();}
+function setFilterIdx(btn){filter=btn._artiest||"";render();}
+function zoekWissen(){document.getElementById("zoekInput").value="";zoek="";document.getElementById("zoekClear").style.display="none";render();}
+document.getElementById("zoekInput").addEventListener("input",function(){
+  zoek=this.value;filter="";
+  document.getElementById("zoekClear").style.display=zoek?"flex":"none";
+  render();
+});
+
+function toonTab(id,btn){
+  document.querySelectorAll("main>div").forEach(d=>d.style.display="none");
+  document.getElementById(id).style.display="block";
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("actief"));
+  btn.classList.add("actief");
+  if(id==="collectie")render();
+}
+
+function plaatOpslaan(){
+  const a=document.getElementById("f_artiest").value.trim();
+  const t=document.getElementById("f_titel").value.trim();
+  if(!a||!t){toonToast("⚠️ Artiest en titel zijn verplicht");return;}
+  col.push({
+    artiest:a,titel:t,
+    jaar:parseInt(document.getElementById("f_jaar").value)||null,
+    label:document.getElementById("f_label").value.trim(),
+    barcode:"",
+    staat_vinyl:document.getElementById("f_staat_vinyl").value,
+    staat_hoes:document.getElementById("f_staat_hoes").value,
+    formaat:document.getElementById("f_formaat").value,
+    genre:document.getElementById("f_genre").value.trim(),
+    land:document.getElementById("f_land").value.trim(),
+    opmerkingen:document.getElementById("f_opmerkingen").value.trim(),
+  });
+  sla();
+  toonToast(`✅ ${a} — ${t} toegevoegd`);
+  ["f_artiest","f_titel","f_jaar","f_label","f_genre","f_land","f_opmerkingen"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById("f_staat_vinyl").selectedIndex=2;
+  document.getElementById("f_staat_hoes").selectedIndex=2;
+  document.querySelector('.tab[onclick*="collectie"]').click();
+}
+
+function verwijder(idx){
+  if(!confirm(`Verwijder "${col[idx].artiest} — ${col[idx].titel}"?`))return;
+  col.splice(idx,1);sla();openId=null;
+  toonToast("🗑 Plaat verwijderd");render();
+}
+
+let toastTimer;
+function toonToast(t){
+  const el=document.getElementById("toast");
+  el.textContent=t;el.classList.add("toon");
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>el.classList.remove("toon"),2500);
+}
+
+laad();render();
+</script>
+</body>
+</html>
